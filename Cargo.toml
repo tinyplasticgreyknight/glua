@@ -1,0 +1,10 @@
+[package]
+name = "glua"
+version = "0.1.0"
+authors = ["GreyKnight <tinyplasticgreyknight@yahoo.com>"]
+
+[dependencies.lua]
+git = "https://github.com/jcmoyer/rust-lua53"
+
+[dependencies]
+libc = "*"
