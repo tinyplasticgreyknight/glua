@@ -3,7 +3,7 @@ extern crate std;
 
 use lua::ffi::lua_State;
 use libc::c_int;
-use std::ptr::{drop_in_place, write};
+use std::ptr::write;
 
 use super::types::*;
 use super::luatype::*;
@@ -13,7 +13,7 @@ pub unsafe extern "C" fn generic_gc<T>(ffi_state : *mut lua_State) -> c_int wher
 	let mut state = lua::State::from_ptr(ffi_state);
 	if let Some(ptr) = state.test_userdata_typed(1, T::type_id()) {
 		let raw_ptr = ptr as *mut Option<LuaCell<T>>;
-		drop_in_place(raw_ptr);
+		*raw_ptr = None;
 	}
 
 	0
