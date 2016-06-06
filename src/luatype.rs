@@ -41,14 +41,18 @@ pub trait LuaType : Sized {
 		state.set_field(-2, "__newindex");
         }
 
+	unsafe fn inner_call_method<F>(state : &mut lua::State, method : F) -> MultiReturn where F : Fn(LuaCell<Self>, &mut lua::State) -> MultiReturn {
+		if let Some(cell) = unpack_item::<Self>(state) {
+			method(cell, state)
+		} else {
+			Err(String::from("bad self argument"))
+		}
+	}
+
 	unsafe fn call_method<F>(ffi_state : *mut lua_State, method : F) -> c_int where F : Fn(LuaCell<Self>, &mut lua::State) -> MultiReturn {
 		let mut state = lua::State::from_ptr(ffi_state);
-		if let Some(baz) = unpack_item::<Self>(&mut state) {
-			let results = method(baz, &mut state);
-			return results.to_lua(&mut state);
-		}
-
-		return Err(String::from("bad self argument")).to_lua(&mut state);
+		let result = Self::inner_call_method(&mut state, method);
+		result.to_lua(&mut state)
 	}
 
 	fn borrow_mut(state : &mut lua::State, index : lua::Index) -> Option<RefMut<Self>> {
